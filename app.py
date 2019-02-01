@@ -1,12 +1,13 @@
-from flask import Flask
+from flask import Flask, render_template
+
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return "Home page"
+    return render_template('index.html')
 
 
 @app.route("/login")
 def login():
-    return "You are not logged in!"
+    return render_template('login.html')
