@@ -1,0 +1,3 @@
+- Implement a logic that actually uses passwords
+- Talk about passwords
+- Introduce tests
