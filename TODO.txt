@@ -1,3 +1,2 @@
-- Implement a logic that actually uses passwords
-- Talk about passwords
+- Add logic to register users
 - Introduce tests
