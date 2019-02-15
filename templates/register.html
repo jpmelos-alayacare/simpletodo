@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>Register page</title>
+    </head>
+    <body>
+        <h1>Register page</h1>
+        <p>
+            <a href="/">Back</a>
+        </p>
+        <form action="/register" method="post">
+            {% if error %}
+                <p>Invalid data!</p>
+            {% endif %}
+            <label for="username">
+                Username:
+                <input type="text" name="username" />
+            </label>
+            <label for="email">
+                Email:
+                <input type="text" name="email" />
+            </label>
+            <label for="password">
+                Password:
+            <input type="password" name="password" />
+	    </label>
+            <input type="submit" value="Register" />
+        </form>
+    </body>
+</html>

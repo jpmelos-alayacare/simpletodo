@@ -1,5 +1,6 @@
 import click
 import bcrypt
+from sqlalchemy import or_
 
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
@@ -22,7 +23,7 @@ def createuser(username, email, password):
     user = User(
         username=username,
         email=email,
-        pw_hash=User.hash_password(password.encode('ascii')),
+        pw_hash=User.hash_password(password),
     )
     db.session.add(user)
     db.session.commit()
@@ -44,7 +45,7 @@ class User(db.Model):
 
     @classmethod
     def hash_password(cls, password):
-        return bcrypt.hashpw(password, bcrypt.gensalt())
+        return bcrypt.hashpw(password.encode('ascii'), bcrypt.gensalt())
 
     @classmethod
     def check_password(cls, password, pw_hash):
@@ -54,6 +55,37 @@ class User(db.Model):
 @app.route("/")
 def index():
     return render_template('index.html')
+
+
+@app.route('/register', methods=["GET", "POST"])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+        if '' in [username, email, password]:
+            return render_template('register.html', error=True)
+
+        # Also check that email is in a valid format
+
+        if db.session.query(User).filter(or_(
+            User.username == username,
+            User.email == email,
+        )).first() is not None:
+            return render_template('register.html', error=True)
+
+        user = User(
+            username=username,
+            email=email,
+            pw_hash=User.hash_password(password),
+        )
+        db.session.add(user)
+        db.session.commit()
+
+        return render_template('register_success.html')
+
+    return render_template('register.html', error=False)
 
 
 @app.route("/login", methods=["GET", "POST"])
