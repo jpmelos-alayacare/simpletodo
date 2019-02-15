@@ -1,1 +1,2 @@
+- Allow a user to be remembered by the application accross requests
 - Introduce tests
