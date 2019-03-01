@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import click
 import bcrypt
 from sqlalchemy import or_
@@ -125,7 +127,7 @@ def login():
         ).one_or_none()
         if user is not None:
             if User.check_password(request.form['password'], user.pw_hash):
-                login_user(user)
+                login_user(user, remember=True, duration=timedelta(days=30))
 
                 return render_template(
                     'logged_in.html',
