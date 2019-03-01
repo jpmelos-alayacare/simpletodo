@@ -30,6 +30,10 @@ def load_user(user_id):
 
 @app.cli.command()
 def initdb():
+    init_db()
+
+
+def init_db():
     db.create_all()
 
 
