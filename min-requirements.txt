@@ -1,4 +1,5 @@
+click
 flask
+flask-login
 flask-sqlalchemy
 psycopg2-binary
-click

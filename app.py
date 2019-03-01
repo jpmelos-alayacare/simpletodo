@@ -2,12 +2,28 @@ import click
 import bcrypt
 from sqlalchemy import or_
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, current_user, logout_user, login_required
 
 app = Flask(__name__)
+app.secret_key = b'secret_key'
+
+# Configure database connection
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost/simpletodo'
 db = SQLAlchemy(app)
+
+# Configure login management
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(User).filter_by(
+        id=int(user_id),
+    ).one_or_none()
 
 
 @app.cli.command()
@@ -51,14 +67,24 @@ class User(db.Model):
     def check_password(cls, password, pw_hash):
         return bcrypt.checkpw(password.encode('ascii'), pw_hash.encode('ascii'))
 
+    is_authenticated = True
+    is_anonymous = False
+    is_active = True
+
+    def get_id(self):
+        return unicode(self.id)
+
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', user=current_user)
 
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
+    if current_user.is_authenticated:
+        return redirect('/')
+
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
@@ -90,12 +116,17 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect('/')
+
     if request.method == "POST":
         user = db.session.query(User).filter_by(
             username=request.form['username'],
         ).one_or_none()
         if user is not None:
             if User.check_password(request.form['password'], user.pw_hash):
+                login_user(user)
+
                 return render_template(
                     'logged_in.html',
                     username=request.form['username'],
@@ -104,3 +135,10 @@ def login():
         return render_template('login.html', error=True)
 
     return render_template('login.html', error=False)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
