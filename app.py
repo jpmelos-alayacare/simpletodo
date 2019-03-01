@@ -96,10 +96,10 @@ def login():
         ).one_or_none()
         if user is not None:
             if User.check_password(request.form['password'], user.pw_hash):
-            return render_template(
-                'logged_in.html',
-                username=request.form['username'],
-            )
+                return render_template(
+                    'logged_in.html',
+                    username=request.form['username'],
+                )
 
         return render_template('login.html', error=True)
 
